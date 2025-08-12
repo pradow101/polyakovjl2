@@ -171,17 +171,6 @@ let
     # CSV.write("potential_data.csv", df)
 end
 
-let 
-    a = range(1,10,10)
-    for (ai,i) in enumerate(a)
-        println(ai, i)
-    end    
-end
-
-
-
-
-
 begin
     function fofinder(T, chuteinit)
         Nbvals, mu_vals, phi_vals, phib_vals, M_vals, potential_vals = Trange_density(T)
@@ -202,6 +191,7 @@ begin
         return mucritico.zero[1], interp2(mucritico.zero[1]), interp1, interp2, x2, y2, x1, y1
     end
 end
+
 # begin
 #     T_vals = range(0.01,0.1,150)
 #     mu = 0.34
@@ -209,7 +199,6 @@ end
 #     plot(T_vals, [M_vals,phi_vals, phib_vals], grid=true, gridalpha=0.5, xlabel = "T", ylabel = "phi, phib", title = "phi and phib solutions", linewidth = 2, label = ["M" "ϕ" "ϕ*"])
 
 # end
-
 
 begin
     T_valores = zeros(length(murange[1,:,1]),length(muvalores))
@@ -224,35 +213,26 @@ begin
         phib_valores[:,i] = interploop[:,3]
         M_valores[:,i] = interploop[:,4]
     end
-end 
-
-let 
-    
-end 
-
-
-
-
-
-
+end
 
 #plot(T_vals, [M_vals], grid=true, gridalpha=0.5, xlabel = "T", ylabel = "phi, M", title = "M and phi solutions")end
 
         
-# begin       #calculating and plotting the pressure
-#     T_vals = range(0.1,0.4,500)
-#     mu = 0
-#     T_vals, phi_vals, phib_vals, M_vals = Trangesolver(mu, T_vals)
-#     pf_vals = zeros(length(T_vals))
-#     for i in 1:length(T_vals)
-#         T = T_vals[i]
-#         phi = phi_vals[i]
-#         phib = phib_vals[i]
-#         M = M_vals[i]
-#         pf_vals[i] = -(potential(phi, phib, 0, T, M) - potential(phi, phib, 0, 0.001, M))/pf(T) #pressure
-#     end
-#     plot(T_vals, pf_vals, grid = true, gridalpha=0.5, xlabel = "T", ylabel = "Pressure", title = "Pressure vs T", xrange = (0.1,0.395))
-# end
+#= begin       #calculating and plotting the pressure
+     T_vals = range(0.1,0.4,500)
+     mu = 0
+     T_vals, phi_vals, phib_vals, M_vals = Trangesolver(mu, T_vals)
+     pf_vals = zeros(length(T_vals))
+     for i in 1:length(T_vals)
+         T = T_vals[i]
+         phi = phi_vals[i]
+         phib = phib_vals[i]
+         M = M_vals[i]
+         pf_vals[i] = -(potential(phi, phib, 0, T, M) - potential(phi, phib, 0, 0.001, M))/pf(T) #pressure
+     end
+     plot(T_vals, pf_vals, grid = true, gridalpha=0.5, xlabel = "T", ylabel = "Pressure", title = "Pressure vs T", xrange = (0.1,0.395))
+ end 
+ =#
 
 begin
     spin1x = []
@@ -269,45 +249,10 @@ begin
         append!(spin2x, x2spin[end])
         append!(spin2y, Ti[i])
     end
-
+    
     plot(spin1x, spin1y)
     plot!(spin2x, spin2y)
 end
-
-begin
-    Ttransitionphi = zeros(length(muvalores))
-    Ttransitionphib = zeros(length(muvalores))
-    actualphi = zeros(length(muvalores))
-    TtransitionM = zeros(length(muvalores))
-    Mutransition = muvalores
-    Threads.@threads for i in 1:length(muvalores)
-        Ttransitionphi[i] = maxfind(phi_valores[:,i], T_valores[:,1])[1]
-        Ttransitionphib[i] = maxfind(phib_valores[:,i], T_valores[:,1])[1]
-        TtransitionM[i] = maxfind(M_valores[:,i], T_valores[:,1])[1]
-        actualphi[i] = (Ttransitionphi[i] + Ttransitionphib[i])/2
-    end
-    Trange = range(0.01, 0.065, length=50)  # Replace with your desired range
-    mucriticos = zeros(length(Trange))
-    Threads.@threads for i in 1:length(Trange)
-        chuteinit = 0.34
-        mucriticos[i] = fofinder(Trange[i], chuteinit)[1]
-        chuteinit = mucriticos[i]
-    end
-    p = plot(mucriticos, Trange, label = "First Order", linewidth = 3)
-    plot!(p, Mutransition, [Ttransitionphi, actualphi], 
-    label = ["ϕ crossover" "M crossover"],
-    xlabel = "μ [GeV]",
-    ylabel = "T [GeV]",
-    title = "PNJL Phase Diagram", dpi=800, linewidth = 3, linestyle = :dash)
-    scatter!(p, [0.331795119246286],[0.06557512526501373], label = "CEP")
-    plot!(p, spin1x, spin1y, linestyle = :dashdot, label = "Spinodal 1")
-    plot!(p, spin2x, spin2y, linestyle = :dashdot, label = "Spinodal 2")
-    plot!(p, mu_quark, T_quark, label = "Quarkyonic Phase", linestyle = :dot)
-    #savefig(p, "PNJL_Phase_Diagram.png")
-end
-
-
-
 
 begin
     function gapsolvermu(mu, T, chute)
@@ -358,10 +303,10 @@ begin
     plot(mu_r, [sols[50,:,2], sols[50,:,3], sols[50,:,4]], xlabel = "μ [GeV]", ylabel = "ϕ, ϕ*, M")
 end
 
-#==
+#=
 for each value of T, i want to check for which value of μ
 is bigger than the value of M, correspondant to that value of T.
-==#
+=#
 
 begin
     function quarkyonic(mu_r, t_r, sols)
@@ -380,8 +325,42 @@ begin
     end
 end
 
-
 begin
     mu_quark, T_quark = quarkyonic(mu_r, t_r, sols)
     plot(mu_quark, T_quark)
 end
+
+begin
+    Ttransitionphi = zeros(length(muvalores))
+    Ttransitionphib = zeros(length(muvalores))
+    actualphi = zeros(length(muvalores))
+    TtransitionM = zeros(length(muvalores))
+    Mutransition = muvalores
+    Threads.@threads for i in 1:length(muvalores)
+        Ttransitionphi[i] = maxfind(phi_valores[:,i], T_valores[:,1])[1]
+        Ttransitionphib[i] = maxfind(phib_valores[:,i], T_valores[:,1])[1]
+        TtransitionM[i] = maxfind(M_valores[:,i], T_valores[:,1])[1]
+        actualphi[i] = (Ttransitionphi[i] + Ttransitionphib[i])/2
+    end
+    Trange = range(0.01, 0.065, length=50)  # Replace with your desired range
+    mucriticos = zeros(length(Trange))
+    Threads.@threads for i in 1:length(Trange)
+        chuteinit = 0.34
+        mucriticos[i] = fofinder(Trange[i], chuteinit)[1]
+        chuteinit = mucriticos[i]
+    end
+    p = plot(mucriticos, Trange, label = "First Order", linewidth = 3)
+    plot!(p, Mutransition, [Ttransitionphi, actualphi], 
+    label = ["ϕ crossover" "M crossover"],
+    xlabel = "μ [GeV]",
+    ylabel = "T [GeV]",
+    title = "PNJL Phase Diagram", dpi=800, linewidth = 3, linestyle = :dash)
+    scatter!(p, [0.331795119246286],[0.06557512526501373], label = "CEP")
+    plot!(p, spin1x, spin1y, linestyle = :dashdot, label = "Spinodal 1")
+    plot!(p, spin2x, spin2y, linestyle = :dashdot, label = "Spinodal 2")
+    plot!(p, mu_quark, T_quark, label = "Quarkyonic Phase", linestyle = :dot)
+    #savefig(p, "PNJL_Phase_Diagram.png")
+end
+
+
+
